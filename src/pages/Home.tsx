@@ -2,7 +2,7 @@ import { Link } from "react-router-dom";
 import { Heart, ClipboardCheck, Stethoscope, UserCheck, HeartHandshake, Award, Monitor, Users, Calendar, ArrowRight } from "lucide-react";
 import { useSiteData } from "@/hooks/useSiteData";
 import { Button } from "@/components/ui/button";
-import doctorImg from "@/assets/doctor-hero.jpg";
+import defaultDoctorImg from "@/assets/doctor-hero.jpg";
 
 const iconMap: Record<string, React.ElementType> = {
   Heart, ClipboardCheck, Stethoscope, UserCheck, HeartHandshake, Award, Monitor, Users,
@@ -30,7 +30,7 @@ export default function Home() {
           </div>
           <div className="flex-shrink-0">
             <img
-              src={doctorImg}
+              src={identity.photo || defaultDoctorImg}
               alt={identity.name}
               className="w-64 h-80 lg:w-80 lg:h-[26rem] object-cover rounded-2xl shadow-elevated ring-4 ring-primary-foreground/20"
             />

@@ -7,12 +7,13 @@ import { Textarea } from "@/components/ui/textarea";
 import { toast } from "sonner";
 import {
   User, Navigation, Home, Info, CalendarDays, FileText, Phone, LayoutDashboard,
-  LogOut, Menu, X, Trash2, Plus, Save
+  LogOut, Menu, X, Trash2, Plus, Save, Palette, Image
 } from "lucide-react";
-import type { SiteData } from "@/data/mockData";
+import type { SiteData, ThemeColors } from "@/data/mockData";
 
 const sections = [
   { key: "identity", label: "Identidade", icon: User },
+  { key: "theme", label: "Cores / Tema", icon: Palette },
   { key: "navbar", label: "Navbar", icon: Navigation },
   { key: "home", label: "Home", icon: Home },
   { key: "about", label: "Quem Somos", icon: Info },
@@ -102,6 +103,8 @@ function EditorSection({ sectionKey, data, updateSection }: {
   switch (sectionKey) {
     case "identity":
       return <IdentityEditor data={data} save={save} />;
+    case "theme":
+      return <ThemeEditor data={data} save={save} />;
     case "navbar":
       return <NavbarEditor data={data} save={save} />;
     case "home":
@@ -146,6 +149,70 @@ function SaveBtn({ onClick }: { onClick: () => void }) {
   );
 }
 
+function FileUpload({ label, value, onChange }: { label: string; value: string; onChange: (v: string) => void }) {
+  const handleFile = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = () => onChange(reader.result as string);
+    reader.readAsDataURL(file);
+  };
+  return (
+    <div>
+      <label className="text-sm font-medium text-foreground mb-1 block">{label}</label>
+      <div className="flex gap-2 items-center">
+        <Input value={value} onChange={(e) => onChange(e.target.value)} placeholder="URL ou faça upload" className="flex-1" />
+        <label className="cursor-pointer inline-flex items-center gap-1 px-3 py-2 rounded-md border border-border bg-muted text-sm hover:bg-accent transition-colors">
+          <Image className="h-4 w-4" /> Upload
+          <input type="file" accept="image/*" className="hidden" onChange={handleFile} />
+        </label>
+      </div>
+      {value && <img src={value} alt="Preview" className="mt-2 h-16 w-16 object-cover rounded-lg border border-border" />}
+    </div>
+  );
+}
+
+function ColorField({ label, value, onChange }: { label: string; value: string; onChange: (v: string) => void }) {
+  return (
+    <div className="flex items-center gap-3">
+      <input type="color" value={value} onChange={(e) => onChange(e.target.value)} className="w-10 h-10 rounded-lg border border-border cursor-pointer" />
+      <div className="flex-1">
+        <label className="text-sm font-medium text-foreground block">{label}</label>
+        <Input value={value} onChange={(e) => onChange(e.target.value)} className="mt-1" />
+      </div>
+    </div>
+  );
+}
+
+function ThemeEditor({ data, save }: { data: SiteData; save: SaveFn }) {
+  const [v, setV] = useState<ThemeColors>(data.theme);
+  useEffect(() => setV(data.theme), [data.theme]);
+  const set = (key: keyof ThemeColors, val: string) => setV({ ...v, [key]: val });
+  return (
+    <div className="space-y-6 max-w-2xl">
+      <FieldGroup>
+        <h3 className="font-heading font-semibold text-foreground text-lg">Cores Principais</h3>
+        <ColorField label="Cor Primária" value={v.primary} onChange={(c) => set("primary", c)} />
+        <ColorField label="Cor Secundária" value={v.secondary} onChange={(c) => set("secondary", c)} />
+        <ColorField label="Cor de Destaque (Accent)" value={v.accent} onChange={(c) => set("accent", c)} />
+      </FieldGroup>
+      <FieldGroup>
+        <h3 className="font-heading font-semibold text-foreground text-lg">Fundo e Texto</h3>
+        <ColorField label="Cor de Fundo" value={v.background} onChange={(c) => set("background", c)} />
+        <ColorField label="Cor do Texto" value={v.foreground} onChange={(c) => set("foreground", c)} />
+        <ColorField label="Cor dos Cards" value={v.card} onChange={(c) => set("card", c)} />
+        <ColorField label="Cor de Elementos Suaves (Muted)" value={v.muted} onChange={(c) => set("muted", c)} />
+      </FieldGroup>
+      <FieldGroup>
+        <h3 className="font-heading font-semibold text-foreground text-lg">Rodapé</h3>
+        <ColorField label="Fundo do Rodapé" value={v.footerBg} onChange={(c) => set("footerBg", c)} />
+        <ColorField label="Texto do Rodapé" value={v.footerText} onChange={(c) => set("footerText", c)} />
+      </FieldGroup>
+      <SaveBtn onClick={() => save("theme", v)} />
+    </div>
+  );
+}
+
 function IdentityEditor({ data, save }: { data: SiteData; save: SaveFn }) {
   const [v, setV] = useState(data.identity);
   useEffect(() => setV(data.identity), [data.identity]);
@@ -154,8 +221,8 @@ function IdentityEditor({ data, save }: { data: SiteData; save: SaveFn }) {
       <Field label="Nome do Médico" value={v.name} onChange={(name) => setV({ ...v, name })} />
       <Field label="CRM" value={v.crm} onChange={(crm) => setV({ ...v, crm })} />
       <Field label="Especialidade" value={v.specialty} onChange={(specialty) => setV({ ...v, specialty })} />
-      <Field label="URL da Foto" value={v.photo} onChange={(photo) => setV({ ...v, photo })} />
-      <Field label="URL do Logo" value={v.logo} onChange={(logo) => setV({ ...v, logo })} />
+      <FileUpload label="Foto do Médico" value={v.photo} onChange={(photo) => setV({ ...v, photo })} />
+      <FileUpload label="Logo" value={v.logo} onChange={(logo) => setV({ ...v, logo })} />
       <SaveBtn onClick={() => save("identity", v)} />
     </FieldGroup>
   );

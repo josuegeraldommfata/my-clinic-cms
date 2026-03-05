@@ -5,22 +5,24 @@ import logoImg from "@/assets/logo.png";
 
 export function SiteFooter() {
   const { data } = useSiteData();
-  const { footer, contact, identity } = data;
+  const { footer, contact, identity, theme } = data;
+
+  const footerStyle = theme ? {
+    backgroundColor: theme.footerBg,
+    color: theme.footerText,
+  } : {};
 
   return (
-    <footer className="bg-foreground text-background">
+    <footer style={footerStyle}>
       <div className="container mx-auto px-4 py-12">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-          {/* Brand */}
           <div>
             <div className="flex items-center gap-2 mb-4">
-              <img src={logoImg} alt="Logo" className="h-10 w-10 object-contain brightness-200" />
+              <img src={identity.logo || logoImg} alt="Logo" className="h-10 w-10 object-contain brightness-200" />
               <span className="font-heading text-lg font-semibold">{identity.name}</span>
             </div>
             <p className="text-sm opacity-70">{identity.specialty} — {identity.crm}</p>
           </div>
-
-          {/* Links */}
           <div>
             <h4 className="font-heading text-lg font-semibold mb-4">Links Rápidos</h4>
             <div className="space-y-2">
@@ -31,8 +33,6 @@ export function SiteFooter() {
               ))}
             </div>
           </div>
-
-          {/* Contact */}
           <div>
             <h4 className="font-heading text-lg font-semibold mb-4">Contato</h4>
             <div className="space-y-2 text-sm opacity-70">
@@ -49,8 +49,7 @@ export function SiteFooter() {
             </div>
           </div>
         </div>
-
-        <div className="border-t border-background/20 mt-8 pt-6 text-center text-sm opacity-50">
+        <div className="border-t border-current/20 mt-8 pt-6 text-center text-sm opacity-50">
           {footer.text}
         </div>
       </div>

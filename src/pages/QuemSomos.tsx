@@ -1,6 +1,6 @@
 import { GraduationCap, Briefcase } from "lucide-react";
 import { useSiteData } from "@/hooks/useSiteData";
-import doctorImg from "@/assets/doctor-hero.jpg";
+import defaultDoctorImg from "@/assets/doctor-hero.jpg";
 
 export default function QuemSomos() {
   const { data } = useSiteData();
@@ -19,7 +19,7 @@ export default function QuemSomos() {
         <div className="container mx-auto px-4">
           <div className="flex flex-col lg:flex-row gap-12 items-start">
             <div className="flex-shrink-0">
-              <img src={doctorImg} alt={identity.name} className="w-64 h-80 object-cover rounded-2xl shadow-elevated" />
+              <img src={identity.photo || defaultDoctorImg} alt={identity.name} className="w-64 h-80 object-cover rounded-2xl shadow-elevated" />
             </div>
             <div className="flex-1">
               <h2 className="text-3xl font-heading font-bold text-foreground mb-1">{identity.name}</h2>
