@@ -1,3 +1,15 @@
+export interface ThemeColors {
+  primary: string;
+  secondary: string;
+  accent: string;
+  background: string;
+  foreground: string;
+  card: string;
+  muted: string;
+  footerBg: string;
+  footerText: string;
+}
+
 export interface SiteData {
   identity: {
     name: string;
@@ -6,6 +18,7 @@ export interface SiteData {
     photo: string;
     logo: string;
   };
+  theme: ThemeColors;
   navbar: {
     links: { label: string; href: string }[];
     ctaText: string;
@@ -73,6 +86,17 @@ export const defaultSiteData: SiteData = {
     specialty: "Cardiologista",
     photo: "",
     logo: "",
+  },
+  theme: {
+    primary: "#0d9488",
+    secondary: "#d97706",
+    accent: "#b2dfdb",
+    background: "#f5f9f8",
+    foreground: "#1e3a3a",
+    card: "#ffffff",
+    muted: "#e8efee",
+    footerBg: "#1e3a3a",
+    footerText: "#f5f9f8",
   },
   navbar: {
     links: [
