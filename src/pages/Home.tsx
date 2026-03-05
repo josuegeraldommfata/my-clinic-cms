@@ -30,7 +30,7 @@ export default function Home() {
           </div>
           <div className="flex-shrink-0">
             <img
-              src={doctorImg}
+              src={identity.photo || defaultDoctorImg}
               alt={identity.name}
               className="w-64 h-80 lg:w-80 lg:h-[26rem] object-cover rounded-2xl shadow-elevated ring-4 ring-primary-foreground/20"
             />
