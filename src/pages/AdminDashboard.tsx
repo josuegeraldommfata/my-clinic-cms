@@ -7,12 +7,13 @@ import { Textarea } from "@/components/ui/textarea";
 import { toast } from "sonner";
 import {
   User, Navigation, Home, Info, CalendarDays, FileText, Phone, LayoutDashboard,
-  LogOut, Menu, X, Trash2, Plus, Save
+  LogOut, Menu, X, Trash2, Plus, Save, Palette, Image
 } from "lucide-react";
-import type { SiteData } from "@/data/mockData";
+import type { SiteData, ThemeColors } from "@/data/mockData";
 
 const sections = [
   { key: "identity", label: "Identidade", icon: User },
+  { key: "theme", label: "Cores / Tema", icon: Palette },
   { key: "navbar", label: "Navbar", icon: Navigation },
   { key: "home", label: "Home", icon: Home },
   { key: "about", label: "Quem Somos", icon: Info },
