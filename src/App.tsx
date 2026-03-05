@@ -4,6 +4,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { SiteLayout } from "@/components/SiteLayout";
+import { ThemeApplier } from "@/components/ThemeApplier";
 import Home from "./pages/Home";
 import QuemSomos from "./pages/QuemSomos";
 import Agenda from "./pages/Agenda";
@@ -22,7 +23,7 @@ const App = () => (
       <Toaster />
       <Sonner />
       <BrowserRouter>
-        <Routes>
+        <ThemeApplier />
           <Route element={<SiteLayout />}>
             <Route path="/" element={<Home />} />
             <Route path="/quem-somos" element={<QuemSomos />} />
