@@ -103,6 +103,8 @@ function EditorSection({ sectionKey, data, updateSection }: {
   switch (sectionKey) {
     case "identity":
       return <IdentityEditor data={data} save={save} />;
+    case "theme":
+      return <ThemeEditor data={data} save={save} />;
     case "navbar":
       return <NavbarEditor data={data} save={save} />;
     case "home":
