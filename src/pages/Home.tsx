@@ -2,7 +2,7 @@ import { Link } from "react-router-dom";
 import { Heart, ClipboardCheck, Stethoscope, UserCheck, HeartHandshake, Award, Monitor, Users, Calendar, ArrowRight } from "lucide-react";
 import { useSiteData } from "@/hooks/useSiteData";
 import { Button } from "@/components/ui/button";
-import doctorImg from "@/assets/doctor-hero.jpg";
+import defaultDoctorImg from "@/assets/doctor-hero.jpg";
 
 const iconMap: Record<string, React.ElementType> = {
   Heart, ClipboardCheck, Stethoscope, UserCheck, HeartHandshake, Award, Monitor, Users,
