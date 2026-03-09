@@ -7,7 +7,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { toast } from "sonner";
 import {
   User, Navigation, Home, Info, CalendarDays, FileText, Phone, LayoutDashboard,
-  LogOut, Menu, X, Trash2, Plus, Save, Palette, Image
+  LogOut, Menu, X, Trash2, Plus, Save, Palette, Image, ChevronRight
 } from "lucide-react";
 import type { SiteData, ThemeColors } from "@/data/mockData";
 
@@ -43,46 +43,63 @@ export default function AdminDashboard() {
   };
 
   return (
-    <div className="min-h-screen flex bg-background">
+    <div className="min-h-screen flex bg-muted/30">
       {/* Sidebar */}
-      <aside className={`fixed lg:static inset-y-0 left-0 z-50 w-64 bg-sidebar text-sidebar-foreground flex flex-col transition-transform ${sidebarOpen ? "translate-x-0" : "-translate-x-full lg:translate-x-0"}`}>
+      <aside className={`fixed lg:static inset-y-0 left-0 z-50 w-[280px] bg-sidebar text-sidebar-foreground flex flex-col transition-transform duration-300 ${sidebarOpen ? "translate-x-0" : "-translate-x-full lg:translate-x-0"}`}>
         <div className="p-4 border-b border-sidebar-border flex items-center justify-between">
-          <h2 className="font-heading text-lg font-bold text-sidebar-foreground">Admin</h2>
-          <button onClick={() => setSidebarOpen(false)} className="lg:hidden"><X className="h-5 w-5" /></button>
+          <div className="flex items-center gap-2">
+            <div className="w-8 h-8 rounded-lg bg-sidebar-primary flex items-center justify-center">
+              <LayoutDashboard className="h-4 w-4 text-sidebar-primary-foreground" />
+            </div>
+            <h2 className="font-heading text-lg font-bold text-sidebar-foreground">Admin</h2>
+          </div>
+          <button onClick={() => setSidebarOpen(false)} className="lg:hidden p-1 rounded-md hover:bg-sidebar-accent">
+            <X className="h-5 w-5" />
+          </button>
         </div>
-        <nav className="flex-1 p-3 space-y-1">
+        <nav className="flex-1 p-2 space-y-0.5 overflow-y-auto">
           {sections.map((s) => (
             <button
               key={s.key}
               onClick={() => { setActive(s.key); setSidebarOpen(false); }}
-              className={`w-full flex items-center gap-2 px-3 py-2 rounded-lg text-sm transition-colors ${
-                active === s.key ? "bg-sidebar-accent text-sidebar-accent-foreground" : "text-sidebar-foreground/70 hover:bg-sidebar-accent/50"
+              className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all ${
+                active === s.key
+                  ? "bg-sidebar-accent text-sidebar-accent-foreground shadow-sm"
+                  : "text-sidebar-foreground/70 hover:bg-sidebar-accent/50 hover:text-sidebar-foreground"
               }`}
             >
-              <s.icon className="h-4 w-4" />
-              {s.label}
+              <s.icon className="h-4 w-4 shrink-0" />
+              <span className="flex-1 text-left">{s.label}</span>
+              {active === s.key && <ChevronRight className="h-3 w-3 opacity-50" />}
             </button>
           ))}
         </nav>
-        <div className="p-3 border-t border-sidebar-border">
-          <button onClick={handleLogout} className="w-full flex items-center gap-2 px-3 py-2 rounded-lg text-sm text-sidebar-foreground/70 hover:bg-sidebar-accent/50">
+        <div className="p-2 border-t border-sidebar-border">
+          <button onClick={handleLogout} className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-sidebar-foreground/70 hover:bg-sidebar-accent/50 hover:text-sidebar-foreground transition-all">
             <LogOut className="h-4 w-4" /> Sair
           </button>
         </div>
       </aside>
 
       {/* Overlay */}
-      {sidebarOpen && <div className="fixed inset-0 bg-foreground/30 z-40 lg:hidden" onClick={() => setSidebarOpen(false)} />}
+      {sidebarOpen && (
+        <div className="fixed inset-0 bg-foreground/40 backdrop-blur-sm z-40 lg:hidden" onClick={() => setSidebarOpen(false)} />
+      )}
 
       {/* Main */}
-      <div className="flex-1 flex flex-col min-h-screen">
-        <header className="h-14 border-b border-border bg-card flex items-center px-4 gap-3">
-          <button onClick={() => setSidebarOpen(true)} className="lg:hidden"><Menu className="h-5 w-5 text-foreground" /></button>
-          <h1 className="text-lg font-heading font-semibold text-foreground">
-            {sections.find((s) => s.key === active)?.label}
-          </h1>
+      <div className="flex-1 flex flex-col min-h-screen min-w-0">
+        <header className="h-14 border-b border-border bg-card/80 backdrop-blur-sm flex items-center px-3 sm:px-6 gap-3 sticky top-0 z-30">
+          <button onClick={() => setSidebarOpen(true)} className="lg:hidden p-2 rounded-lg hover:bg-muted transition-colors">
+            <Menu className="h-5 w-5 text-foreground" />
+          </button>
+          <div className="flex items-center gap-2">
+            {(() => { const Icon = sections.find((s) => s.key === active)?.icon || Home; return <Icon className="h-5 w-5 text-primary" />; })()}
+            <h1 className="text-base sm:text-lg font-heading font-semibold text-foreground">
+              {sections.find((s) => s.key === active)?.label}
+            </h1>
+          </div>
         </header>
-        <main className="flex-1 p-4 md:p-6 overflow-y-auto">
+        <main className="flex-1 p-3 sm:p-6 overflow-y-auto">
           <EditorSection sectionKey={active} data={data} updateSection={updateSection} />
         </main>
       </div>
@@ -101,41 +118,37 @@ function EditorSection({ sectionKey, data, updateSection }: {
   };
 
   switch (sectionKey) {
-    case "identity":
-      return <IdentityEditor data={data} save={save} />;
-    case "theme":
-      return <ThemeEditor data={data} save={save} />;
-    case "navbar":
-      return <NavbarEditor data={data} save={save} />;
-    case "home":
-      return <HomeEditor data={data} save={save} />;
-    case "about":
-      return <AboutEditor data={data} save={save} />;
-    case "schedule":
-      return <ScheduleEditor data={data} save={save} />;
-    case "blog":
-      return <BlogEditor data={data} save={save} />;
-    case "contact":
-      return <ContactEditor data={data} save={save} />;
-    case "footer":
-      return <FooterEditor data={data} save={save} />;
+    case "identity": return <IdentityEditor data={data} save={save} />;
+    case "theme": return <ThemeEditor data={data} save={save} />;
+    case "navbar": return <NavbarEditor data={data} save={save} />;
+    case "home": return <HomeEditor data={data} save={save} />;
+    case "about": return <AboutEditor data={data} save={save} />;
+    case "schedule": return <ScheduleEditor data={data} save={save} />;
+    case "blog": return <BlogEditor data={data} save={save} />;
+    case "contact": return <ContactEditor data={data} save={save} />;
+    case "footer": return <FooterEditor data={data} save={save} />;
   }
 }
 
 type SaveFn = (key: keyof SiteData, value: unknown) => void;
 
-function FieldGroup({ children }: { children: React.ReactNode }) {
-  return <div className="bg-card rounded-xl p-6 shadow-card border border-border space-y-4 max-w-2xl">{children}</div>;
+function FieldGroup({ title, children }: { title?: string; children: React.ReactNode }) {
+  return (
+    <div className="bg-card rounded-xl p-4 sm:p-6 shadow-card border border-border space-y-4">
+      {title && <h3 className="font-heading font-semibold text-foreground text-base sm:text-lg">{title}</h3>}
+      {children}
+    </div>
+  );
 }
 
 function Field({ label, value, onChange, textarea }: { label: string; value: string; onChange: (v: string) => void; textarea?: boolean }) {
   return (
     <div>
-      <label className="text-sm font-medium text-foreground mb-1 block">{label}</label>
+      <label className="text-xs sm:text-sm font-medium text-foreground mb-1 block">{label}</label>
       {textarea ? (
-        <Textarea value={value} onChange={(e) => onChange(e.target.value)} rows={4} />
+        <Textarea value={value} onChange={(e) => onChange(e.target.value)} rows={4} className="text-sm" />
       ) : (
-        <Input value={value} onChange={(e) => onChange(e.target.value)} />
+        <Input value={value} onChange={(e) => onChange(e.target.value)} className="text-sm" />
       )}
     </div>
   );
@@ -143,7 +156,7 @@ function Field({ label, value, onChange, textarea }: { label: string; value: str
 
 function SaveBtn({ onClick }: { onClick: () => void }) {
   return (
-    <Button onClick={onClick} className="bg-primary text-primary-foreground hover:bg-primary/90 gap-1 mt-2">
+    <Button onClick={onClick} className="bg-primary text-primary-foreground hover:bg-primary/90 gap-1.5 mt-2 w-full sm:w-auto">
       <Save className="h-4 w-4" /> Salvar
     </Button>
   );
@@ -159,15 +172,15 @@ function FileUpload({ label, value, onChange }: { label: string; value: string; 
   };
   return (
     <div>
-      <label className="text-sm font-medium text-foreground mb-1 block">{label}</label>
-      <div className="flex gap-2 items-center">
-        <Input value={value} onChange={(e) => onChange(e.target.value)} placeholder="URL ou faça upload" className="flex-1" />
-        <label className="cursor-pointer inline-flex items-center gap-1 px-3 py-2 rounded-md border border-border bg-muted text-sm hover:bg-accent transition-colors">
+      <label className="text-xs sm:text-sm font-medium text-foreground mb-1 block">{label}</label>
+      <div className="flex flex-col sm:flex-row gap-2">
+        <Input value={value} onChange={(e) => onChange(e.target.value)} placeholder="URL ou faça upload" className="flex-1 text-sm" />
+        <label className="cursor-pointer inline-flex items-center justify-center gap-1.5 px-3 py-2 rounded-md border border-border bg-muted text-sm hover:bg-accent transition-colors shrink-0">
           <Image className="h-4 w-4" /> Upload
           <input type="file" accept="image/*" className="hidden" onChange={handleFile} />
         </label>
       </div>
-      {value && <img src={value} alt="Preview" className="mt-2 h-16 w-16 object-cover rounded-lg border border-border" />}
+      {value && <img src={value} alt="Preview" className="mt-2 h-14 w-14 sm:h-16 sm:w-16 object-cover rounded-lg border border-border" />}
     </div>
   );
 }
@@ -175,10 +188,10 @@ function FileUpload({ label, value, onChange }: { label: string; value: string; 
 function ColorField({ label, value, onChange }: { label: string; value: string; onChange: (v: string) => void }) {
   return (
     <div className="flex items-center gap-3">
-      <input type="color" value={value} onChange={(e) => onChange(e.target.value)} className="w-10 h-10 rounded-lg border border-border cursor-pointer" />
-      <div className="flex-1">
-        <label className="text-sm font-medium text-foreground block">{label}</label>
-        <Input value={value} onChange={(e) => onChange(e.target.value)} className="mt-1" />
+      <input type="color" value={value} onChange={(e) => onChange(e.target.value)} className="w-9 h-9 sm:w-10 sm:h-10 rounded-lg border border-border cursor-pointer shrink-0" />
+      <div className="flex-1 min-w-0">
+        <label className="text-xs sm:text-sm font-medium text-foreground block">{label}</label>
+        <Input value={value} onChange={(e) => onChange(e.target.value)} className="mt-1 text-sm" />
       </div>
     </div>
   );
@@ -189,22 +202,19 @@ function ThemeEditor({ data, save }: { data: SiteData; save: SaveFn }) {
   useEffect(() => setV(data.theme), [data.theme]);
   const set = (key: keyof ThemeColors, val: string) => setV({ ...v, [key]: val });
   return (
-    <div className="space-y-6 max-w-2xl">
-      <FieldGroup>
-        <h3 className="font-heading font-semibold text-foreground text-lg">Cores Principais</h3>
+    <div className="space-y-4 sm:space-y-6 max-w-2xl">
+      <FieldGroup title="Cores Principais">
         <ColorField label="Cor Primária" value={v.primary} onChange={(c) => set("primary", c)} />
         <ColorField label="Cor Secundária" value={v.secondary} onChange={(c) => set("secondary", c)} />
         <ColorField label="Cor de Destaque (Accent)" value={v.accent} onChange={(c) => set("accent", c)} />
       </FieldGroup>
-      <FieldGroup>
-        <h3 className="font-heading font-semibold text-foreground text-lg">Fundo e Texto</h3>
+      <FieldGroup title="Fundo e Texto">
         <ColorField label="Cor de Fundo" value={v.background} onChange={(c) => set("background", c)} />
         <ColorField label="Cor do Texto" value={v.foreground} onChange={(c) => set("foreground", c)} />
         <ColorField label="Cor dos Cards" value={v.card} onChange={(c) => set("card", c)} />
         <ColorField label="Cor de Elementos Suaves (Muted)" value={v.muted} onChange={(c) => set("muted", c)} />
       </FieldGroup>
-      <FieldGroup>
-        <h3 className="font-heading font-semibold text-foreground text-lg">Rodapé</h3>
+      <FieldGroup title="Rodapé">
         <ColorField label="Fundo do Rodapé" value={v.footerBg} onChange={(c) => set("footerBg", c)} />
         <ColorField label="Texto do Rodapé" value={v.footerText} onChange={(c) => set("footerText", c)} />
       </FieldGroup>
@@ -217,14 +227,16 @@ function IdentityEditor({ data, save }: { data: SiteData; save: SaveFn }) {
   const [v, setV] = useState(data.identity);
   useEffect(() => setV(data.identity), [data.identity]);
   return (
-    <FieldGroup>
-      <Field label="Nome do Médico" value={v.name} onChange={(name) => setV({ ...v, name })} />
-      <Field label="CRM" value={v.crm} onChange={(crm) => setV({ ...v, crm })} />
-      <Field label="Especialidade" value={v.specialty} onChange={(specialty) => setV({ ...v, specialty })} />
-      <FileUpload label="Foto do Médico" value={v.photo} onChange={(photo) => setV({ ...v, photo })} />
-      <FileUpload label="Logo" value={v.logo} onChange={(logo) => setV({ ...v, logo })} />
-      <SaveBtn onClick={() => save("identity", v)} />
-    </FieldGroup>
+    <div className="max-w-2xl">
+      <FieldGroup>
+        <Field label="Nome do Médico" value={v.name} onChange={(name) => setV({ ...v, name })} />
+        <Field label="CRM" value={v.crm} onChange={(crm) => setV({ ...v, crm })} />
+        <Field label="Especialidade" value={v.specialty} onChange={(specialty) => setV({ ...v, specialty })} />
+        <FileUpload label="Foto do Médico" value={v.photo} onChange={(photo) => setV({ ...v, photo })} />
+        <FileUpload label="Logo" value={v.logo} onChange={(logo) => setV({ ...v, logo })} />
+        <SaveBtn onClick={() => save("identity", v)} />
+      </FieldGroup>
+    </div>
   );
 }
 
@@ -232,17 +244,19 @@ function NavbarEditor({ data, save }: { data: SiteData; save: SaveFn }) {
   const [v, setV] = useState(data.navbar);
   useEffect(() => setV(data.navbar), [data.navbar]);
   return (
-    <FieldGroup>
-      <Field label="Texto do Botão CTA" value={v.ctaText} onChange={(ctaText) => setV({ ...v, ctaText })} />
-      <h3 className="font-semibold text-foreground">Links</h3>
-      {v.links.map((l, i) => (
-        <div key={i} className="flex gap-2">
-          <Input placeholder="Label" value={l.label} onChange={(e) => { const links = [...v.links]; links[i] = { ...l, label: e.target.value }; setV({ ...v, links }); }} />
-          <Input placeholder="URL" value={l.href} onChange={(e) => { const links = [...v.links]; links[i] = { ...l, href: e.target.value }; setV({ ...v, links }); }} />
-        </div>
-      ))}
-      <SaveBtn onClick={() => save("navbar", v)} />
-    </FieldGroup>
+    <div className="max-w-2xl">
+      <FieldGroup>
+        <Field label="Texto do Botão CTA" value={v.ctaText} onChange={(ctaText) => setV({ ...v, ctaText })} />
+        <h3 className="font-semibold text-foreground text-sm sm:text-base">Links</h3>
+        {v.links.map((l, i) => (
+          <div key={i} className="flex flex-col sm:flex-row gap-2">
+            <Input placeholder="Label" value={l.label} onChange={(e) => { const links = [...v.links]; links[i] = { ...l, label: e.target.value }; setV({ ...v, links }); }} className="text-sm" />
+            <Input placeholder="URL" value={l.href} onChange={(e) => { const links = [...v.links]; links[i] = { ...l, href: e.target.value }; setV({ ...v, links }); }} className="text-sm" />
+          </div>
+        ))}
+        <SaveBtn onClick={() => save("navbar", v)} />
+      </FieldGroup>
+    </div>
   );
 }
 
@@ -251,29 +265,26 @@ function HomeEditor({ data, save }: { data: SiteData; save: SaveFn }) {
   useEffect(() => setV(data.home), [data.home]);
 
   return (
-    <div className="space-y-6 max-w-2xl">
-      <FieldGroup>
-        <h3 className="font-heading font-semibold text-foreground text-lg">Hero</h3>
+    <div className="space-y-4 sm:space-y-6 max-w-2xl">
+      <FieldGroup title="Hero">
         <Field label="Título" value={v.hero.title} onChange={(title) => setV({ ...v, hero: { ...v.hero, title } })} />
         <Field label="Subtítulo" value={v.hero.subtitle} onChange={(subtitle) => setV({ ...v, hero: { ...v.hero, subtitle } })} />
         <Field label="Texto" value={v.hero.text} onChange={(text) => setV({ ...v, hero: { ...v.hero, text } })} textarea />
         <Field label="Botão CTA" value={v.hero.ctaText} onChange={(ctaText) => setV({ ...v, hero: { ...v.hero, ctaText } })} />
       </FieldGroup>
 
-      <FieldGroup>
-        <h3 className="font-heading font-semibold text-foreground text-lg">Serviços</h3>
+      <FieldGroup title="Serviços">
         <Field label="Título da Seção" value={v.services.title} onChange={(title) => setV({ ...v, services: { ...v.services, title } })} />
         {v.services.items.map((item, i) => (
           <div key={i} className="border border-border rounded-lg p-3 space-y-2">
-            <Input placeholder="Ícone" value={item.icon} onChange={(e) => { const items = [...v.services.items]; items[i] = { ...item, icon: e.target.value }; setV({ ...v, services: { ...v.services, items } }); }} />
-            <Input placeholder="Título" value={item.title} onChange={(e) => { const items = [...v.services.items]; items[i] = { ...item, title: e.target.value }; setV({ ...v, services: { ...v.services, items } }); }} />
-            <Textarea placeholder="Descrição" value={item.description} onChange={(e) => { const items = [...v.services.items]; items[i] = { ...item, description: e.target.value }; setV({ ...v, services: { ...v.services, items } }); }} rows={2} />
+            <Input placeholder="Ícone" value={item.icon} onChange={(e) => { const items = [...v.services.items]; items[i] = { ...item, icon: e.target.value }; setV({ ...v, services: { ...v.services, items } }); }} className="text-sm" />
+            <Input placeholder="Título" value={item.title} onChange={(e) => { const items = [...v.services.items]; items[i] = { ...item, title: e.target.value }; setV({ ...v, services: { ...v.services, items } }); }} className="text-sm" />
+            <Textarea placeholder="Descrição" value={item.description} onChange={(e) => { const items = [...v.services.items]; items[i] = { ...item, description: e.target.value }; setV({ ...v, services: { ...v.services, items } }); }} rows={2} className="text-sm" />
           </div>
         ))}
       </FieldGroup>
 
-      <FieldGroup>
-        <h3 className="font-heading font-semibold text-foreground text-lg">CTA</h3>
+      <FieldGroup title="CTA">
         <Field label="Título" value={v.cta.title} onChange={(title) => setV({ ...v, cta: { ...v.cta, title } })} />
         <Field label="Texto" value={v.cta.text} onChange={(text) => setV({ ...v, cta: { ...v.cta, text } })} textarea />
         <Field label="Botão" value={v.cta.buttonText} onChange={(buttonText) => setV({ ...v, cta: { ...v.cta, buttonText } })} />
@@ -289,17 +300,16 @@ function AboutEditor({ data, save }: { data: SiteData; save: SaveFn }) {
   useEffect(() => setV(data.about), [data.about]);
 
   return (
-    <div className="space-y-6 max-w-2xl">
+    <div className="space-y-4 sm:space-y-6 max-w-2xl">
       <FieldGroup>
         <Field label="Biografia" value={v.bio} onChange={(bio) => setV({ ...v, bio })} textarea />
       </FieldGroup>
-      <FieldGroup>
-        <h3 className="font-heading font-semibold text-foreground text-lg">Formação</h3>
+      <FieldGroup title="Formação">
         {v.education.map((e, i) => (
           <div key={i} className="border border-border rounded-lg p-3 space-y-2">
-            <Input placeholder="Título" value={e.title} onChange={(ev) => { const edu = [...v.education]; edu[i] = { ...e, title: ev.target.value }; setV({ ...v, education: edu }); }} />
-            <Input placeholder="Instituição" value={e.institution} onChange={(ev) => { const edu = [...v.education]; edu[i] = { ...e, institution: ev.target.value }; setV({ ...v, education: edu }); }} />
-            <Input placeholder="Ano" value={e.year} onChange={(ev) => { const edu = [...v.education]; edu[i] = { ...e, year: ev.target.value }; setV({ ...v, education: edu }); }} />
+            <Input placeholder="Título" value={e.title} onChange={(ev) => { const edu = [...v.education]; edu[i] = { ...e, title: ev.target.value }; setV({ ...v, education: edu }); }} className="text-sm" />
+            <Input placeholder="Instituição" value={e.institution} onChange={(ev) => { const edu = [...v.education]; edu[i] = { ...e, institution: ev.target.value }; setV({ ...v, education: edu }); }} className="text-sm" />
+            <Input placeholder="Ano" value={e.year} onChange={(ev) => { const edu = [...v.education]; edu[i] = { ...e, year: ev.target.value }; setV({ ...v, education: edu }); }} className="text-sm" />
             <Button variant="outline" size="sm" className="text-destructive" onClick={() => { const edu = v.education.filter((_, j) => j !== i); setV({ ...v, education: edu }); }}>
               <Trash2 className="h-3 w-3 mr-1" /> Remover
             </Button>
@@ -309,13 +319,12 @@ function AboutEditor({ data, save }: { data: SiteData; save: SaveFn }) {
           <Plus className="h-3 w-3 mr-1" /> Adicionar Formação
         </Button>
       </FieldGroup>
-      <FieldGroup>
-        <h3 className="font-heading font-semibold text-foreground text-lg">Experiência</h3>
+      <FieldGroup title="Experiência">
         {v.experience.map((e, i) => (
           <div key={i} className="border border-border rounded-lg p-3 space-y-2">
-            <Input placeholder="Cargo" value={e.role} onChange={(ev) => { const exp = [...v.experience]; exp[i] = { ...e, role: ev.target.value }; setV({ ...v, experience: exp }); }} />
-            <Input placeholder="Local" value={e.place} onChange={(ev) => { const exp = [...v.experience]; exp[i] = { ...e, place: ev.target.value }; setV({ ...v, experience: exp }); }} />
-            <Input placeholder="Período" value={e.period} onChange={(ev) => { const exp = [...v.experience]; exp[i] = { ...e, period: ev.target.value }; setV({ ...v, experience: exp }); }} />
+            <Input placeholder="Cargo" value={e.role} onChange={(ev) => { const exp = [...v.experience]; exp[i] = { ...e, role: ev.target.value }; setV({ ...v, experience: exp }); }} className="text-sm" />
+            <Input placeholder="Local" value={e.place} onChange={(ev) => { const exp = [...v.experience]; exp[i] = { ...e, place: ev.target.value }; setV({ ...v, experience: exp }); }} className="text-sm" />
+            <Input placeholder="Período" value={e.period} onChange={(ev) => { const exp = [...v.experience]; exp[i] = { ...e, period: ev.target.value }; setV({ ...v, experience: exp }); }} className="text-sm" />
             <Button variant="outline" size="sm" className="text-destructive" onClick={() => { const exp = v.experience.filter((_, j) => j !== i); setV({ ...v, experience: exp }); }}>
               <Trash2 className="h-3 w-3 mr-1" /> Remover
             </Button>
@@ -334,14 +343,16 @@ function ScheduleEditor({ data, save }: { data: SiteData; save: SaveFn }) {
   const [v, setV] = useState(data.schedule);
   useEffect(() => setV(data.schedule), [data.schedule]);
   return (
-    <FieldGroup>
-      <Field label="Dias" value={v.days} onChange={(days) => setV({ ...v, days })} />
-      <Field label="Horários" value={v.hours} onChange={(hours) => setV({ ...v, hours })} />
-      <Field label="Endereço" value={v.address} onChange={(address) => setV({ ...v, address })} />
-      <Field label="WhatsApp" value={v.whatsapp} onChange={(whatsapp) => setV({ ...v, whatsapp })} />
-      <Field label="Telefone" value={v.phone} onChange={(phone) => setV({ ...v, phone })} />
-      <SaveBtn onClick={() => save("schedule", v)} />
-    </FieldGroup>
+    <div className="max-w-2xl">
+      <FieldGroup>
+        <Field label="Dias" value={v.days} onChange={(days) => setV({ ...v, days })} />
+        <Field label="Horários" value={v.hours} onChange={(hours) => setV({ ...v, hours })} />
+        <Field label="Endereço" value={v.address} onChange={(address) => setV({ ...v, address })} />
+        <Field label="WhatsApp" value={v.whatsapp} onChange={(whatsapp) => setV({ ...v, whatsapp })} />
+        <Field label="Telefone" value={v.phone} onChange={(phone) => setV({ ...v, phone })} />
+        <SaveBtn onClick={() => save("schedule", v)} />
+      </FieldGroup>
+    </div>
   );
 }
 
@@ -364,18 +375,18 @@ function BlogEditor({ data, save }: { data: SiteData; save: SaveFn }) {
   return (
     <div className="space-y-4 max-w-2xl">
       {posts.map((p, i) => (
-        <div key={p.id} className="bg-card rounded-xl p-5 shadow-card border border-border space-y-3">
-          <Input placeholder="Título" value={p.title} onChange={(e) => update(i, "title", e.target.value)} />
-          <Input placeholder="URL da Imagem" value={p.image} onChange={(e) => update(i, "image", e.target.value)} />
-          <Textarea placeholder="Resumo" value={p.summary} onChange={(e) => update(i, "summary", e.target.value)} rows={2} />
-          <Textarea placeholder="Conteúdo" value={p.content} onChange={(e) => update(i, "content", e.target.value)} rows={4} />
-          <Input type="date" value={p.date} onChange={(e) => update(i, "date", e.target.value)} />
+        <div key={p.id} className="bg-card rounded-xl p-4 sm:p-5 shadow-card border border-border space-y-3">
+          <Input placeholder="Título" value={p.title} onChange={(e) => update(i, "title", e.target.value)} className="text-sm" />
+          <Input placeholder="URL da Imagem" value={p.image} onChange={(e) => update(i, "image", e.target.value)} className="text-sm" />
+          <Textarea placeholder="Resumo" value={p.summary} onChange={(e) => update(i, "summary", e.target.value)} rows={2} className="text-sm" />
+          <Textarea placeholder="Conteúdo" value={p.content} onChange={(e) => update(i, "content", e.target.value)} rows={4} className="text-sm" />
+          <Input type="date" value={p.date} onChange={(e) => update(i, "date", e.target.value)} className="text-sm" />
           <Button variant="outline" size="sm" className="text-destructive" onClick={() => removePost(i)}>
             <Trash2 className="h-3 w-3 mr-1" /> Excluir Artigo
           </Button>
         </div>
       ))}
-      <div className="flex gap-3">
+      <div className="flex flex-col sm:flex-row gap-3">
         <Button variant="outline" onClick={addPost} className="gap-1"><Plus className="h-4 w-4" /> Novo Artigo</Button>
         <SaveBtn onClick={() => save("blog", posts)} />
       </div>
@@ -387,7 +398,7 @@ function ContactEditor({ data, save }: { data: SiteData; save: SaveFn }) {
   const [v, setV] = useState(data.contact);
   useEffect(() => setV(data.contact), [data.contact]);
   return (
-    <div className="space-y-6 max-w-2xl">
+    <div className="space-y-4 sm:space-y-6 max-w-2xl">
       <FieldGroup>
         <Field label="Telefone" value={v.phone} onChange={(phone) => setV({ ...v, phone })} />
         <Field label="WhatsApp" value={v.whatsapp} onChange={(whatsapp) => setV({ ...v, whatsapp })} />
@@ -395,14 +406,13 @@ function ContactEditor({ data, save }: { data: SiteData; save: SaveFn }) {
         <Field label="Endereço" value={v.address} onChange={(address) => setV({ ...v, address })} />
         <Field label="URL do Mapa" value={v.mapUrl} onChange={(mapUrl) => setV({ ...v, mapUrl })} />
       </FieldGroup>
-      <FieldGroup>
-        <h3 className="font-heading font-semibold text-foreground text-lg">Redes Sociais</h3>
+      <FieldGroup title="Redes Sociais">
         {v.social.map((s, i) => (
-          <div key={i} className="flex gap-2">
-            <Input placeholder="Plataforma" value={s.platform} onChange={(e) => { const social = [...v.social]; social[i] = { ...s, platform: e.target.value }; setV({ ...v, social }); }} />
-            <Input placeholder="URL" value={s.url} onChange={(e) => { const social = [...v.social]; social[i] = { ...s, url: e.target.value }; setV({ ...v, social }); }} />
-            <Button variant="outline" size="sm" className="text-destructive shrink-0" onClick={() => setV({ ...v, social: v.social.filter((_, j) => j !== i) })}>
-              <Trash2 className="h-3 w-3" />
+          <div key={i} className="flex flex-col sm:flex-row gap-2">
+            <Input placeholder="Plataforma" value={s.platform} onChange={(e) => { const social = [...v.social]; social[i] = { ...s, platform: e.target.value }; setV({ ...v, social }); }} className="text-sm" />
+            <Input placeholder="URL" value={s.url} onChange={(e) => { const social = [...v.social]; social[i] = { ...s, url: e.target.value }; setV({ ...v, social }); }} className="text-sm" />
+            <Button variant="outline" size="sm" className="text-destructive shrink-0 w-full sm:w-auto" onClick={() => setV({ ...v, social: v.social.filter((_, j) => j !== i) })}>
+              <Trash2 className="h-3 w-3 mr-1" /> Remover
             </Button>
           </div>
         ))}
@@ -419,25 +429,23 @@ function FooterEditor({ data, save }: { data: SiteData; save: SaveFn }) {
   const [v, setV] = useState(data.footer);
   useEffect(() => setV(data.footer), [data.footer]);
   return (
-    <div className="space-y-6 max-w-2xl">
+    <div className="space-y-4 sm:space-y-6 max-w-2xl">
       <FieldGroup>
         <Field label="Texto do Copyright" value={v.text} onChange={(text) => setV({ ...v, text })} />
       </FieldGroup>
-      <FieldGroup>
-        <h3 className="font-heading font-semibold text-foreground text-lg">Links</h3>
+      <FieldGroup title="Links">
         {v.links.map((l, i) => (
-          <div key={i} className="flex gap-2">
-            <Input placeholder="Label" value={l.label} onChange={(e) => { const links = [...v.links]; links[i] = { ...l, label: e.target.value }; setV({ ...v, links }); }} />
-            <Input placeholder="URL" value={l.href} onChange={(e) => { const links = [...v.links]; links[i] = { ...l, href: e.target.value }; setV({ ...v, links }); }} />
+          <div key={i} className="flex flex-col sm:flex-row gap-2">
+            <Input placeholder="Label" value={l.label} onChange={(e) => { const links = [...v.links]; links[i] = { ...l, label: e.target.value }; setV({ ...v, links }); }} className="text-sm" />
+            <Input placeholder="URL" value={l.href} onChange={(e) => { const links = [...v.links]; links[i] = { ...l, href: e.target.value }; setV({ ...v, links }); }} className="text-sm" />
           </div>
         ))}
       </FieldGroup>
-      <FieldGroup>
-        <h3 className="font-heading font-semibold text-foreground text-lg">Redes Sociais</h3>
+      <FieldGroup title="Redes Sociais">
         {v.social.map((s, i) => (
-          <div key={i} className="flex gap-2">
-            <Input placeholder="Plataforma" value={s.platform} onChange={(e) => { const social = [...v.social]; social[i] = { ...s, platform: e.target.value }; setV({ ...v, social }); }} />
-            <Input placeholder="URL" value={s.url} onChange={(e) => { const social = [...v.social]; social[i] = { ...s, url: e.target.value }; setV({ ...v, social }); }} />
+          <div key={i} className="flex flex-col sm:flex-row gap-2">
+            <Input placeholder="Plataforma" value={s.platform} onChange={(e) => { const social = [...v.social]; social[i] = { ...s, platform: e.target.value }; setV({ ...v, social }); }} className="text-sm" />
+            <Input placeholder="URL" value={s.url} onChange={(e) => { const social = [...v.social]; social[i] = { ...s, url: e.target.value }; setV({ ...v, social }); }} className="text-sm" />
           </div>
         ))}
       </FieldGroup>
