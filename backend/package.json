@@ -1,0 +1,13 @@
+{
+  "name": "clinic-cms-backend",
+  "version": "1.0.0",
+  "scripts": {
+    "dev": "node server-complete.js",
+    "db:init": "node init-db-complete.js",
+    "start": "node server-complete.js",
+    "install": "npm install"
+  },
+  "dependencies": {
+    "pg": "^8.12.0"
+  }
+}

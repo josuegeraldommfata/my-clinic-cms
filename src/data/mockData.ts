@@ -17,7 +17,9 @@ export interface SiteData {
     specialty: string;
     photo: string;
     logo: string;
+    favicon?: string;
   };
+
   theme: ThemeColors;
   navbar: {
     links: { label: string; href: string }[];
@@ -86,7 +88,9 @@ export const defaultSiteData: SiteData = {
     specialty: "Cardiologista",
     photo: "",
     logo: "",
+    favicon: "",
   },
+
   theme: {
     primary: "#0d9488",
     secondary: "#d97706",

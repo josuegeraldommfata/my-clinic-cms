@@ -5,6 +5,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { SiteLayout } from "@/components/SiteLayout";
 import { ThemeApplier } from "@/components/ThemeApplier";
+import { TitleManager } from "@/components/TitleManager";
 import Home from "./pages/Home";
 import QuemSomos from "./pages/QuemSomos";
 import Agenda from "./pages/Agenda";
@@ -15,6 +16,7 @@ import AdminLogin from "./pages/AdminLogin";
 import AdminDashboard from "./pages/AdminDashboard";
 import NotFound from "./pages/NotFound";
 
+
 const queryClient = new QueryClient();
 
 const App = () => (
@@ -24,7 +26,9 @@ const App = () => (
       <Sonner />
       <BrowserRouter>
         <ThemeApplier />
+        <TitleManager />
         <Routes>
+
           <Route element={<SiteLayout />}>
             <Route path="/" element={<Home />} />
             <Route path="/quem-somos" element={<QuemSomos />} />

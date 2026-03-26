@@ -146,9 +146,9 @@ function Field({ label, value, onChange, textarea }: { label: string; value: str
     <div>
       <label className="text-xs sm:text-sm font-medium text-foreground mb-1 block">{label}</label>
       {textarea ? (
-        <Textarea value={value} onChange={(e) => onChange(e.target.value)} rows={4} className="text-sm" />
+        <Textarea value={value || ''} onChange={(e) => onChange(e.target.value)} rows={4} className="text-sm" />
       ) : (
-        <Input value={value} onChange={(e) => onChange(e.target.value)} className="text-sm" />
+        <Input value={value || ''} onChange={(e) => onChange(e.target.value)} className="text-sm" />
       )}
     </div>
   );
@@ -198,25 +198,37 @@ function ColorField({ label, value, onChange }: { label: string; value: string; 
 }
 
 function ThemeEditor({ data, save }: { data: SiteData; save: SaveFn }) {
-  const [v, setV] = useState<ThemeColors>(data.theme);
-  useEffect(() => setV(data.theme), [data.theme]);
+  const [v, setV] = useState<ThemeColors>({
+    primary: '#0d9488',
+    secondary: '#d97706',
+    accent: '#b2dfdb',
+    background: '#f5f9f8',
+    foreground: '#1e3a3a',
+    card: '#ffffff',
+    muted: '#e8efee',
+    footerBg: '#1e3a3a',
+    footerText: '#f5f9f8'
+  });
+  useEffect(() => {
+    if (data.theme) setV(data.theme);
+  }, [data.theme]);
   const set = (key: keyof ThemeColors, val: string) => setV({ ...v, [key]: val });
   return (
     <div className="space-y-4 sm:space-y-6 max-w-2xl">
       <FieldGroup title="Cores Principais">
-        <ColorField label="Cor Primária" value={v.primary} onChange={(c) => set("primary", c)} />
-        <ColorField label="Cor Secundária" value={v.secondary} onChange={(c) => set("secondary", c)} />
-        <ColorField label="Cor de Destaque (Accent)" value={v.accent} onChange={(c) => set("accent", c)} />
+        <ColorField label="Cor Primária" value={v.primary || '#0d9488'} onChange={(c) => set("primary", c)} />
+        <ColorField label="Cor Secundária" value={v.secondary || '#d97706'} onChange={(c) => set("secondary", c)} />
+        <ColorField label="Cor de Destaque (Accent)" value={v.accent || '#b2dfdb'} onChange={(c) => set("accent", c)} />
       </FieldGroup>
       <FieldGroup title="Fundo e Texto">
-        <ColorField label="Cor de Fundo" value={v.background} onChange={(c) => set("background", c)} />
-        <ColorField label="Cor do Texto" value={v.foreground} onChange={(c) => set("foreground", c)} />
-        <ColorField label="Cor dos Cards" value={v.card} onChange={(c) => set("card", c)} />
-        <ColorField label="Cor de Elementos Suaves (Muted)" value={v.muted} onChange={(c) => set("muted", c)} />
+        <ColorField label="Cor de Fundo" value={v.background || '#f5f9f8'} onChange={(c) => set("background", c)} />
+        <ColorField label="Cor do Texto" value={v.foreground || '#1e3a3a'} onChange={(c) => set("foreground", c)} />
+        <ColorField label="Cor dos Cards" value={v.card || '#ffffff'} onChange={(c) => set("card", c)} />
+        <ColorField label="Cor de Elementos Suaves (Muted)" value={v.muted || '#e8efee'} onChange={(c) => set("muted", c)} />
       </FieldGroup>
       <FieldGroup title="Rodapé">
-        <ColorField label="Fundo do Rodapé" value={v.footerBg} onChange={(c) => set("footerBg", c)} />
-        <ColorField label="Texto do Rodapé" value={v.footerText} onChange={(c) => set("footerText", c)} />
+        <ColorField label="Fundo do Rodapé" value={v.footerBg || '#1e3a3a'} onChange={(c) => set("footerBg", c)} />
+        <ColorField label="Texto do Rodapé" value={v.footerText || '#f5f9f8'} onChange={(c) => set("footerText", c)} />
       </FieldGroup>
       <SaveBtn onClick={() => save("theme", v)} />
     </div>
@@ -229,65 +241,88 @@ function IdentityEditor({ data, save }: { data: SiteData; save: SaveFn }) {
   return (
     <div className="max-w-2xl">
       <FieldGroup>
-        <Field label="Nome do Médico" value={v.name} onChange={(name) => setV({ ...v, name })} />
+        <Field label="Título da Página" value={v.name} onChange={(name) => setV({ ...v, name })} />
         <Field label="CRM" value={v.crm} onChange={(crm) => setV({ ...v, crm })} />
         <Field label="Especialidade" value={v.specialty} onChange={(specialty) => setV({ ...v, specialty })} />
         <FileUpload label="Foto do Médico" value={v.photo} onChange={(photo) => setV({ ...v, photo })} />
-        <FileUpload label="Logo" value={v.logo} onChange={(logo) => setV({ ...v, logo })} />
+        <FileUpload label="Logo Navbar" value={v.logo} onChange={(logo) => setV({ ...v, logo })} />
+        <FileUpload label="Favicon" value={v.favicon || ''} onChange={(favicon) => setV({ ...v, favicon })} />
         <SaveBtn onClick={() => save("identity", v)} />
       </FieldGroup>
     </div>
   );
 }
 
+
 function NavbarEditor({ data, save }: { data: SiteData; save: SaveFn }) {
-  const [v, setV] = useState(data.navbar);
-  useEffect(() => setV(data.navbar), [data.navbar]);
+const [v, setV] = useState({ ctaText: '', links: [] });
+  useEffect(() => setV(data.navbar || { ctaText: '', links: [] }), [data.navbar]);
   return (
     <div className="max-w-2xl">
       <FieldGroup>
-        <Field label="Texto do Botão CTA" value={v.ctaText} onChange={(ctaText) => setV({ ...v, ctaText })} />
+        <Field label="Texto do Botão CTA" value={v.ctaText || ''} onChange={(ctaText) => setV({ ...v, ctaText })} />
         <h3 className="font-semibold text-foreground text-sm sm:text-base">Links</h3>
-        {v.links.map((l, i) => (
+        {(v.links || []).map((l, i) => (
           <div key={i} className="flex flex-col sm:flex-row gap-2">
-            <Input placeholder="Label" value={l.label} onChange={(e) => { const links = [...v.links]; links[i] = { ...l, label: e.target.value }; setV({ ...v, links }); }} className="text-sm" />
-            <Input placeholder="URL" value={l.href} onChange={(e) => { const links = [...v.links]; links[i] = { ...l, href: e.target.value }; setV({ ...v, links }); }} className="text-sm" />
+            <Input placeholder="Label" value={l.label || ''} onChange={(e) => {
+              const links = [...(v.links || [])];
+              links[i] = { ...l, label: e.target.value };
+              setV({ ...v, links });
+            }} className="text-sm" />
+            <Input placeholder="URL" value={l.href || ''} onChange={(e) => {
+              const links = [...(v.links || [])];
+              links[i] = { ...l, href: e.target.value };
+              setV({ ...v, links });
+            }} className="text-sm" />
           </div>
         ))}
         <SaveBtn onClick={() => save("navbar", v)} />
       </FieldGroup>
     </div>
   );
+
 }
 
 function HomeEditor({ data, save }: { data: SiteData; save: SaveFn }) {
-  const [v, setV] = useState(data.home);
-  useEffect(() => setV(data.home), [data.home]);
+  const [v, setV] = useState({ hero: { title: '', subtitle: '', text: '', ctaText: '' }, services: { title: '', items: [] }, differentials: { title: '', items: [] }, cta: { title: '', text: '', buttonText: '' } });
+  useEffect(() => setV(data.home || v), [data.home]);
 
   return (
     <div className="space-y-4 sm:space-y-6 max-w-2xl">
       <FieldGroup title="Hero">
-        <Field label="Título" value={v.hero.title} onChange={(title) => setV({ ...v, hero: { ...v.hero, title } })} />
-        <Field label="Subtítulo" value={v.hero.subtitle} onChange={(subtitle) => setV({ ...v, hero: { ...v.hero, subtitle } })} />
-        <Field label="Texto" value={v.hero.text} onChange={(text) => setV({ ...v, hero: { ...v.hero, text } })} textarea />
-        <Field label="Botão CTA" value={v.hero.ctaText} onChange={(ctaText) => setV({ ...v, hero: { ...v.hero, ctaText } })} />
+        <Field label="Título" value={(v.hero?.title || '')} onChange={(title) => setV({ ...v, hero: { ...v.hero, title } })} />
+        <Field label="Subtítulo" value={(v.hero?.subtitle || '')} onChange={(subtitle) => setV({ ...v, hero: { ...v.hero, subtitle } })} />
+        <Field label="Texto" value={(v.hero?.text || '')} onChange={(text) => setV({ ...v, hero: { ...v.hero, text } })} textarea />
+        <Field label="Botão CTA" value={(v.hero?.ctaText || '')} onChange={(ctaText) => setV({ ...v, hero: { ...v.hero, ctaText } })} />
       </FieldGroup>
 
       <FieldGroup title="Serviços">
-        <Field label="Título da Seção" value={v.services.title} onChange={(title) => setV({ ...v, services: { ...v.services, title } })} />
-        {v.services.items.map((item, i) => (
+        <Field label="Título da Seção" value={(v.services?.title || '')} onChange={(title) => setV({ ...v, services: { ...v.services, title } })} />
+        {((v.services?.items || [])).map((item, i) => (
           <div key={i} className="border border-border rounded-lg p-3 space-y-2">
-            <Input placeholder="Ícone" value={item.icon} onChange={(e) => { const items = [...v.services.items]; items[i] = { ...item, icon: e.target.value }; setV({ ...v, services: { ...v.services, items } }); }} className="text-sm" />
-            <Input placeholder="Título" value={item.title} onChange={(e) => { const items = [...v.services.items]; items[i] = { ...item, title: e.target.value }; setV({ ...v, services: { ...v.services, items } }); }} className="text-sm" />
-            <Textarea placeholder="Descrição" value={item.description} onChange={(e) => { const items = [...v.services.items]; items[i] = { ...item, description: e.target.value }; setV({ ...v, services: { ...v.services, items } }); }} rows={2} className="text-sm" />
+            <Input placeholder="Ícone" value={item.icon || ''} onChange={(e) => {
+              const items = [...(v.services?.items || [])];
+              items[i] = { ...item, icon: e.target.value };
+              setV({ ...v, services: { ...v.services, items } });
+            }} className="text-sm" />
+            <Input placeholder="Título" value={item.title || ''} onChange={(e) => {
+              const items = [...(v.services?.items || [])];
+              items[i] = { ...item, title: e.target.value };
+              setV({ ...v, services: { ...v.services, items } });
+            }} className="text-sm" />
+            <Textarea placeholder="Descrição" value={item.description || ''} onChange={(e) => {
+              const items = [...(v.services?.items || [])];
+              items[i] = { ...item, description: e.target.value };
+              setV({ ...v, services: { ...v.services, items } });
+            }} rows={2} className="text-sm" />
           </div>
         ))}
       </FieldGroup>
 
       <FieldGroup title="CTA">
-        <Field label="Título" value={v.cta.title} onChange={(title) => setV({ ...v, cta: { ...v.cta, title } })} />
-        <Field label="Texto" value={v.cta.text} onChange={(text) => setV({ ...v, cta: { ...v.cta, text } })} textarea />
-        <Field label="Botão" value={v.cta.buttonText} onChange={(buttonText) => setV({ ...v, cta: { ...v.cta, buttonText } })} />
+        <Field label="Título" value={(v.cta?.title || '')} onChange={(title) => setV({ ...v, cta: { ...v.cta, title } })} />
+        <Field label="Texto" value={(v.cta?.text || '')} onChange={(text) => setV({ ...v, cta: { ...v.cta, text } })} textarea />
+        <Field label="Botão" value={(v.cta?.buttonText || '')} onChange={(buttonText) => setV({ ...v, cta: { ...v.cta, buttonText } })} />
       </FieldGroup>
 
       <SaveBtn onClick={() => save("home", v)} />
@@ -296,41 +331,71 @@ function HomeEditor({ data, save }: { data: SiteData; save: SaveFn }) {
 }
 
 function AboutEditor({ data, save }: { data: SiteData; save: SaveFn }) {
-  const [v, setV] = useState(data.about);
-  useEffect(() => setV(data.about), [data.about]);
+  const [v, setV] = useState({ bio: '', education: [], experience: [] });
+  useEffect(() => setV(data.about || { bio: '', education: [], experience: [] }), [data.about]);
 
   return (
     <div className="space-y-4 sm:space-y-6 max-w-2xl">
       <FieldGroup>
-        <Field label="Biografia" value={v.bio} onChange={(bio) => setV({ ...v, bio })} textarea />
+        <Field label="Biografia" value={v.bio || ''} onChange={(bio) => setV({ ...v, bio })} textarea />
       </FieldGroup>
       <FieldGroup title="Formação">
-        {v.education.map((e, i) => (
+        {(v.education || []).map((e, i) => (
           <div key={i} className="border border-border rounded-lg p-3 space-y-2">
-            <Input placeholder="Título" value={e.title} onChange={(ev) => { const edu = [...v.education]; edu[i] = { ...e, title: ev.target.value }; setV({ ...v, education: edu }); }} className="text-sm" />
-            <Input placeholder="Instituição" value={e.institution} onChange={(ev) => { const edu = [...v.education]; edu[i] = { ...e, institution: ev.target.value }; setV({ ...v, education: edu }); }} className="text-sm" />
-            <Input placeholder="Ano" value={e.year} onChange={(ev) => { const edu = [...v.education]; edu[i] = { ...e, year: ev.target.value }; setV({ ...v, education: edu }); }} className="text-sm" />
-            <Button variant="outline" size="sm" className="text-destructive" onClick={() => { const edu = v.education.filter((_, j) => j !== i); setV({ ...v, education: edu }); }}>
+            <Input placeholder="Título" value={e.title || ''} onChange={(ev) => {
+              const edu = [...(v.education || [])];
+              edu[i] = { ...e, title: ev.target.value };
+              setV({ ...v, education: edu });
+            }} className="text-sm" />
+            <Input placeholder="Instituição" value={e.institution || ''} onChange={(ev) => {
+              const edu = [...(v.education || [])];
+              edu[i] = { ...e, institution: ev.target.value };
+              setV({ ...v, education: edu });
+            }} className="text-sm" />
+            <Input placeholder="Ano" value={e.year || ''} onChange={(ev) => {
+              const edu = [...(v.education || [])];
+              edu[i] = { ...e, year: ev.target.value };
+              setV({ ...v, education: edu });
+            }} className="text-sm" />
+            <Button variant="outline" size="sm" className="text-destructive" onClick={() => {
+              const edu = (v.education || []).filter((_, j) => j !== i);
+              setV({ ...v, education: edu });
+            }}>
               <Trash2 className="h-3 w-3 mr-1" /> Remover
             </Button>
           </div>
         ))}
-        <Button variant="outline" size="sm" onClick={() => setV({ ...v, education: [...v.education, { title: "", institution: "", year: "" }] })}>
+        <Button variant="outline" size="sm" onClick={() => setV({ ...v, education: [...(v.education || []), { title: "", institution: "", year: "" }] })}>
           <Plus className="h-3 w-3 mr-1" /> Adicionar Formação
         </Button>
       </FieldGroup>
       <FieldGroup title="Experiência">
-        {v.experience.map((e, i) => (
+        {(v.experience || []).map((e, i) => (
           <div key={i} className="border border-border rounded-lg p-3 space-y-2">
-            <Input placeholder="Cargo" value={e.role} onChange={(ev) => { const exp = [...v.experience]; exp[i] = { ...e, role: ev.target.value }; setV({ ...v, experience: exp }); }} className="text-sm" />
-            <Input placeholder="Local" value={e.place} onChange={(ev) => { const exp = [...v.experience]; exp[i] = { ...e, place: ev.target.value }; setV({ ...v, experience: exp }); }} className="text-sm" />
-            <Input placeholder="Período" value={e.period} onChange={(ev) => { const exp = [...v.experience]; exp[i] = { ...e, period: ev.target.value }; setV({ ...v, experience: exp }); }} className="text-sm" />
-            <Button variant="outline" size="sm" className="text-destructive" onClick={() => { const exp = v.experience.filter((_, j) => j !== i); setV({ ...v, experience: exp }); }}>
+            <Input placeholder="Cargo" value={e.role || ''} onChange={(ev) => {
+              const exp = [...(v.experience || [])];
+              exp[i] = { ...e, role: ev.target.value };
+              setV({ ...v, experience: exp });
+            }} className="text-sm" />
+            <Input placeholder="Local" value={e.place || ''} onChange={(ev) => {
+              const exp = [...(v.experience || [])];
+              exp[i] = { ...e, place: ev.target.value };
+              setV({ ...v, experience: exp });
+            }} className="text-sm" />
+            <Input placeholder="Período" value={e.period || ''} onChange={(ev) => {
+              const exp = [...(v.experience || [])];
+              exp[i] = { ...e, period: ev.target.value };
+              setV({ ...v, experience: exp });
+            }} className="text-sm" />
+            <Button variant="outline" size="sm" className="text-destructive" onClick={() => {
+              const exp = (v.experience || []).filter((_, j) => j !== i);
+              setV({ ...v, experience: exp });
+            }}>
               <Trash2 className="h-3 w-3 mr-1" /> Remover
             </Button>
           </div>
         ))}
-        <Button variant="outline" size="sm" onClick={() => setV({ ...v, experience: [...v.experience, { role: "", place: "", period: "" }] })}>
+        <Button variant="outline" size="sm" onClick={() => setV({ ...v, experience: [...(v.experience || []), { role: "", place: "", period: "" }] })}>
           <Plus className="h-3 w-3 mr-1" /> Adicionar Experiência
         </Button>
       </FieldGroup>
@@ -426,26 +491,42 @@ function ContactEditor({ data, save }: { data: SiteData; save: SaveFn }) {
 }
 
 function FooterEditor({ data, save }: { data: SiteData; save: SaveFn }) {
-  const [v, setV] = useState(data.footer);
-  useEffect(() => setV(data.footer), [data.footer]);
+  const [v, setV] = useState({ text: '', links: [], social: [] });
+  useEffect(() => setV(data.footer || { text: '', links: [], social: [] }), [data.footer]);
   return (
     <div className="space-y-4 sm:space-y-6 max-w-2xl">
       <FieldGroup>
-        <Field label="Texto do Copyright" value={v.text} onChange={(text) => setV({ ...v, text })} />
+        <Field label="Texto do Copyright" value={v.text || ''} onChange={(text) => setV({ ...v, text })} />
       </FieldGroup>
       <FieldGroup title="Links">
-        {v.links.map((l, i) => (
+        {(v.links || []).map((l, i) => (
           <div key={i} className="flex flex-col sm:flex-row gap-2">
-            <Input placeholder="Label" value={l.label} onChange={(e) => { const links = [...v.links]; links[i] = { ...l, label: e.target.value }; setV({ ...v, links }); }} className="text-sm" />
-            <Input placeholder="URL" value={l.href} onChange={(e) => { const links = [...v.links]; links[i] = { ...l, href: e.target.value }; setV({ ...v, links }); }} className="text-sm" />
+            <Input placeholder="Label" value={l.label || ''} onChange={(e) => {
+              const links = [...(v.links || [])];
+              links[i] = { ...l, label: e.target.value };
+              setV({ ...v, links });
+            }} className="text-sm" />
+            <Input placeholder="URL" value={l.href || ''} onChange={(e) => {
+              const links = [...(v.links || [])];
+              links[i] = { ...l, href: e.target.value };
+              setV({ ...v, links });
+            }} className="text-sm" />
           </div>
         ))}
       </FieldGroup>
       <FieldGroup title="Redes Sociais">
-        {v.social.map((s, i) => (
+        {(v.social || []).map((s, i) => (
           <div key={i} className="flex flex-col sm:flex-row gap-2">
-            <Input placeholder="Plataforma" value={s.platform} onChange={(e) => { const social = [...v.social]; social[i] = { ...s, platform: e.target.value }; setV({ ...v, social }); }} className="text-sm" />
-            <Input placeholder="URL" value={s.url} onChange={(e) => { const social = [...v.social]; social[i] = { ...s, url: e.target.value }; setV({ ...v, social }); }} className="text-sm" />
+            <Input placeholder="Plataforma" value={s.platform || ''} onChange={(e) => {
+              const social = [...(v.social || [])];
+              social[i] = { ...s, platform: e.target.value };
+              setV({ ...v, social });
+            }} className="text-sm" />
+            <Input placeholder="URL" value={s.url || ''} onChange={(e) => {
+              const social = [...(v.social || [])];
+              social[i] = { ...s, url: e.target.value };
+              setV({ ...v, social });
+            }} className="text-sm" />
           </div>
         ))}
       </FieldGroup>

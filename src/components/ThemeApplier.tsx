@@ -1,7 +1,9 @@
 import { useEffect } from "react";
 import { useSiteData } from "@/hooks/useSiteData";
 
-function hexToHsl(hex: string): string {
+const hexToHsl = (hex?: string): string => {
+  if (!hex || hex.length !== 7) return '240 5.9% 10%'; // fallback
+
   const r = parseInt(hex.slice(1, 3), 16) / 255;
   const g = parseInt(hex.slice(3, 5), 16) / 255;
   const b = parseInt(hex.slice(5, 7), 16) / 255;
@@ -22,36 +24,44 @@ function hexToHsl(hex: string): string {
 
 export function ThemeApplier() {
   const { data } = useSiteData();
-  const { theme } = data;
 
   useEffect(() => {
-    if (!theme) return;
-    const root = document.documentElement;
-    const set = (name: string, hex: string) => {
-      try { root.style.setProperty(name, hexToHsl(hex)); } catch {}
+    const theme = data.theme || {
+      primary: '#0d9488',
+      secondary: '#d97706',
+      accent: '#b2dfdb',
+      background: '#f5f9f8',
+      foreground: '#1e3a3a',
+      card: '#ffffff',
+      muted: '#e8efee',
+      footerBg: '#1e3a3a',
+      footerText: '#f5f9f8'
     };
-    set("--primary", theme.primary);
-    set("--secondary", theme.secondary);
-    set("--accent", theme.accent);
-    set("--background", theme.background);
-    set("--foreground", theme.foreground);
-    set("--card", theme.card);
-    set("--card-foreground", theme.foreground);
-    set("--popover", theme.card);
-    set("--popover-foreground", theme.foreground);
-    set("--muted", theme.muted);
-    set("--ring", theme.primary);
-    set("--accent-foreground", theme.primary);
+    const root = document.documentElement;
+    const setVar = (name: string, hex: string) => root.style.setProperty(name, hexToHsl(hex));
 
-    // Gradient updates
+    setVar("--primary", theme.primary || '#0d9488');
+    setVar("--secondary", theme.secondary || '#d97706');
+    setVar("--accent", theme.accent || '#b2dfdb');
+    setVar("--background", theme.background || '#f5f9f8');
+    setVar("--foreground", theme.foreground || '#1e3a3a');
+    setVar("--card", theme.card || '#ffffff');
+    setVar("--card-foreground", theme.foreground || '#1e3a3a');
+    setVar("--popover", theme.card || '#ffffff');
+    setVar("--popover-foreground", theme.foreground || '#1e3a3a');
+    setVar("--muted", theme.muted || '#e8efee');
+    setVar("--ring", theme.primary || '#0d9488');
+    setVar("--accent-foreground", theme.primary || '#0d9488');
+
+    // Gradientes
     const pHsl = hexToHsl(theme.primary);
     root.style.setProperty("--gradient-hero", `linear-gradient(135deg, hsl(${pHsl}), hsl(${pHsl} / 0.8))`);
     const sHsl = hexToHsl(theme.secondary);
     root.style.setProperty("--gradient-cta", `linear-gradient(135deg, hsl(${sHsl}), hsl(${sHsl} / 0.85))`);
 
-    // Footer handled via CSS vars
-    set("--sidebar-background", theme.primary);
-  }, [theme]);
+    setVar("--sidebar-background", theme.primary || '#0d9488');
+  }, [data]);
 
   return null;
 }
+
